@@ -1,0 +1,678 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<bpr:release xmlns:bpr="http://www.blueprism.co.uk/product/release">
+    <bpr:name>AIOps</bpr:name>
+    <bpr:release-notes />
+    <bpr:created>2023-12-21 10:50:50Z</bpr:created>
+    <bpr:package-id>-1</bpr:package-id>
+    <bpr:package-name>&lt;Adhoc Package&gt;</bpr:package-name>
+    <bpr:user-created-by>admin</bpr:user-created-by>
+    <bpr:contents count="9">
+        <process id="784a202d-bcd7-4825-a7f3-76799f611611" name="CreateExceptionsInQueue" xmlns="http://www.blueprism.co.uk/product/process"><process name="CreateExceptionsInQueue" version="1.0" bpversion="7.3.0.5589" narrative="Sample process to create exceptions for demo" byrefcollection="true" processrunningmessage=""><view><camerax>-46</camerax><cameray>0</cameray><zoom version="2">1.25</zoom></view><preconditions /><endpoint narrative="" /><stage stageid="31eb71fb-458b-435f-8ac6-46de2d286d97" name="Start" type="Start"><display x="15" y="-105" /><onsuccess>19376be5-2855-403a-9580-49e19312643e</onsuccess></stage><stage stageid="cbeab5d4-d249-4115-91f8-52282a0756b3" name="End" type="End"><display x="15" y="75" /></stage><stage stageid="07653c88-fc48-4005-a9a6-cb4aba294b2f" name="Stage1" type="ProcessInfo"><display x="-195" y="-105" w="150" h="90" /></stage><stage stageid="5b4220b7-c6e8-4b48-a26e-e899c59a9546" name="Queue Items" type="Collection"><display x="-150" y="15" /><datatype>collection</datatype><private /><alwaysinit /><collectioninfo><field name="id" type="number" /><field name="name" type="text" /><field name="exception" type="text" /></collectioninfo><initialvalue><row><field name="id" type="number" value="1" /><field name="name" type="text" value="Ashish" /><field name="exception" type="text" value="Remote Exception R0045 : External Web service is busy, please try after sometime" /></row><row><field name="id" type="number" value="2" /><field name="name" type="text" value="BP" /><field name="exception" type="text" value="Remote Exception R103 : SAP Hana is down for maintenance environment will be available after 2am UTC" /></row><row><field name="id" type="number" value="3" /><field name="name" type="text" value="SSNC" /><field name="exception" type="text" value="Business Exception B121: Name mismatch in account payable" /></row><row><field name="id" type="number" value="4" /><field name="name" type="text" value="BP Finance" /><field name="exception" type="text" value="System Exception S0012: ERROR: Internal : Failed to perform step 1 in Navigate Stage 'Navigate1' on page 'attach' - Target application could not be identified, please ensure the application is running and review the following action inputs and/or application model identifiers: WindowTitle, ProcessName" /></row></initialvalue></stage><stage stageid="19376be5-2855-403a-9580-49e19312643e" name="add dummy data to collection" type="Action"><loginhibit onsuccess="true" /><narrative>The Data collection contains the items to be added to the queue. The collection may contain single or multiple rows, with each representing an item to be added.
+
+If there is a failure during the process, the queue will be unchanged - i.e. no rows will be loaded even if the error occurred on the last one.
+
+If Defer Until is specified, the items will not be available to be worked until then. Otherwise, they are available immediately.
+
+If the queue has a key field defined, an item added has key data longer than the maximum permitted 255 characters, an error will occur</narrative><display x="150" y="-105" /><inputs><input type="text" name="Queue Name" friendlyname="Queue Name" narrative="The name of the queue to add items to" expr="[Queue Name]" /><input type="collection" name="Data" friendlyname="Data" narrative="A collection containing the data, one row for each item to be added" expr="[Queue Items]" /><input type="datetime" name="Defer Until" friendlyname="Defer Until" narrative="Optionally, the date/time the new item(s) should be deferred until" expr="" /><input type="number" name="Priority" friendlyname="Priority" narrative="Optionally, the priority for the new item(s). Lower numbers represent higher priorities. The default is 0." expr="" /><input type="text" name="Tags" friendlyname="Tags" narrative="Optionally, a semi-colon-separated set of tags to apply to the queue item(s)" expr="" /><input type="text" name="Status" friendlyname="Status" narrative="Optionally, the initial status required of the work queue item(s) " expr="" /><input type="number" name="Batch Size" friendlyname="Batch Size" narrative="Optionally, the batch size to use when adding many items to the queue.  A Value of 0 will process all items in one batch.  An empty field will use the default batch size of 1000." expr=""><validator type="BluePrism.AutomateProcessCore.RangeParameterValidation" parameter="0:25000" /></input></inputs><outputs><output type="collection" name="Item IDs" friendlyname="Item IDs" narrative="The IDs of the items which have been added to the queue, in the order of the collection of data passed that was input" stage="Item IDs" /></outputs><onsuccess>88c725e8-40fa-44d0-9f83-4d67d2d43e29</onsuccess><resource object="Blueprism.Automate.clsWorkQueuesActions" action="Add To Queue" /></stage><stage stageid="b8a6b012-7dd5-4437-a309-45a27f18f9a8" name="Queue Name" type="Data"><loginhibit onsuccess="true" /><display x="-210" y="-30" /><datatype>text</datatype><initialvalue xml:space="preserve">ExceptionTestQueue</initialvalue><private /><alwaysinit /></stage><stage stageid="7a0b13bd-f5fa-4897-880d-bb06221fe419" name="Item IDs" type="Collection"><display x="-270" y="15" /><datatype>collection</datatype><private /><alwaysinit /><collectioninfo><field name="Item ID" type="text" description="The Item ID of the work queue item" displayname="Item IDs" /></collectioninfo></stage><stage stageid="88c725e8-40fa-44d0-9f83-4d67d2d43e29" name="Get Dummy Data to mark as exception" type="Action"><narrative>This action gets the next item to be worked from the queue, returning its details and locking it so no other case can work it.
+
+Items with higher priorities (lower numerical value) are processed first. Where the priority is the same, the next item is the one that has been in the queue the longest,  is not already locked, and is not already completed.
+
+The Item ID returned is used to make further calls to update the work status for that item. It may be empty, in which case there are no items available. This can mean either a) the queue is empty, or b) the queue is not running. This mechanism can be used to cleanly stop all processes working a particular queue at the end of the next case. Items that have a 'deferred' time set will not be returned unless that time has been reached.</narrative><display x="15" y="-45" /><inputs><input type="text" name="Queue Name" friendlyname="Queue Name" narrative="The name of the queue" expr="[Queue Name]" /><input type="text" name="Key Filter" friendlyname="Key Filter" narrative="Optionally, a key value to filter by. Only items with this key value will be considered." expr="" /><input type="text" name="Tag Filter" friendlyname="Tag Filter" narrative="Optionally, a tag mask to filter by. This can consist of any number of tag searches - each term can be separated by a semi-colon and they are all applied to the search (ie. they are AND'ed terms not OR'ed terms). For example, &quot;Account: Joint; -Balance: Overdrawn; Card: *Visa*&quot; will include any items which match all the terms, ie. every item must have an 'Account: Joint' tag applied, no item can have a 'Balance: Overdrawn' tag applied, every item must have a tag applied which starts with 'Card: ' and then contains the text 'Visa'." expr="" /></inputs><outputs><output type="text" name="Item ID" friendlyname="Item ID" narrative="The ID of the item retrieved - empty if there are none available." stage="Item ID" /><output type="collection" name="Data" friendlyname="Data" narrative="The data associated with the item - a single collection row." stage="Item Data" /><output type="text" name="Status" friendlyname="Status" narrative="The status of the item." stage="" /><output type="number" name="Attempts" friendlyname="Attempts" narrative="The number of attempts already made to work this item." stage="" /></outputs><onsuccess>a4055085-de1a-4752-b055-f84a6afee9ff</onsuccess><resource object="Blueprism.Automate.clsWorkQueuesActions" action="Get Next Item" /></stage><stage stageid="a4055085-de1a-4752-b055-f84a6afee9ff" name="Got item?" type="Decision"><display x="150" y="75" /><decision expression="[Item ID]&lt;&gt;&quot;&quot;" /><ontrue>370586a9-c8e6-4c21-b1fa-75e76b8ddef2</ontrue><onfalse>cbeab5d4-d249-4115-91f8-52282a0756b3</onfalse></stage><stage stageid="93226796-0c6d-4697-b827-d8c918aaa9e3" name="Item ID" type="Data"><display x="240" y="-60" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="370586a9-c8e6-4c21-b1fa-75e76b8ddef2" name="Work Queues::Mark Exception" type="Action"><loginhibit onsuccess="true" /><narrative>Marks the item as an exception, optionally retrying it by cloning the item and returning the ID of the clone. The item must be 'owned' by the calling process - i.e. it must have been retrieved using Get Next Item.</narrative><display x="150" y="-45" /><inputs><input type="text" name="Item ID" friendlyname="Item ID" narrative="The ID of the item to mark" expr="[Item ID]" /><input type="text" name="Exception Reason" friendlyname="Exception Reason" narrative="A description of the reason for the exception" expr="[Item Data.exception]" /><input type="flag" name="Retry" friendlyname="Retry" narrative="Whether or not to retry the item, up to the maximum number of attempts specified for the queue. Optional - if not specified, the item will be retried" expr="" /><input type="flag" name="Keep Locked" friendlyname="Keep Locked" narrative="Whether or not the clone of the item should remain locked after the exception has been registered and the item is retried. Optional - default is False" expr="" /></inputs><outputs><output type="text" name="New Item ID" friendlyname="New Item ID" narrative="The Item ID of the newly cloned item. This item will be locked if 'Keep Locked' is True. This will be empty if no item was cloned (ie. the item was not retried." stage="" /></outputs><onsuccess>88c725e8-40fa-44d0-9f83-4d67d2d43e29</onsuccess><resource object="Blueprism.Automate.clsWorkQueuesActions" action="Mark Exception" /></stage><stage stageid="b9bd903f-f8dd-4da6-a7a9-d213b4392f72" name="Item Data" type="Collection"><display x="240" y="0" /><datatype>collection</datatype><private /><alwaysinit /></stage></process></process>
+        <process id="c717a9d1-5820-4276-8318-3f4878401831" name="ProcessExceptionsInQueue" xmlns="http://www.blueprism.co.uk/product/process"><process name="ProcessExceptionsInQueue" version="1.0" bpversion="7.3.0.5589" narrative="" byrefcollection="true" processrunningmessage=""><view><camerax>283</camerax><cameray>111</cameray><zoom version="2">1.25</zoom></view><preconditions /><endpoint narrative="" /><subsheet subsheetid="3a988150-a880-48ca-8322-96a127f86fd8" type="Normal" published="False"><name>Bard-interaction</name><view><camerax>0</camerax><cameray>-21</cameray><zoom version="2">1.25</zoom></view></subsheet><stage stageid="fad5607c-2ab6-41c5-b97a-5955f9c55f5b" name="Stage1" type="ProcessInfo"><display x="-195" y="-105" w="150" h="90" /></stage><stage stageid="1b5e70f2-23b1-4440-bd7b-0e92055120ed" name="Start" type="Start"><loginhibit /><display x="150" y="-90" /><inputs><input type="text" name="QueueName" stage="QueueName" /></inputs><onsuccess>c388124a-5b64-4bf0-aa72-f244c14a016e</onsuccess></stage><stage stageid="d15ca7d4-e2e9-4fdb-9ae3-fa2632010b4a" name="End" type="End"><loginhibit /><display x="120" y="150" /></stage><stage stageid="e4f88a89-8c2c-4769-8a76-b757763b4f6e" name="QueueName" type="Data"><display x="285" y="-150" /><datatype>text</datatype><initialvalue xml:space="preserve">ExceptionTestQueue</initialvalue><private /><alwaysinit /></stage><stage stageid="c388124a-5b64-4bf0-aa72-f244c14a016e" name="Work Queues::Get Exception Items" type="Action"><loginhibit onsuccess="true" /><narrative>Gets the work items from the specified queue which have been marked with an exception on the latest attempt.</narrative><display x="300" y="-90" /><inputs><input type="text" name="Queue Name" friendlyname="Queue Name" narrative="The name of the queue to retrieve the exception items from" expr="[QueueName]" /><input type="datetime" name="Start Date" friendlyname="Start Date" narrative="Optionally, the start threshold date. Any items returned will have been marked as an exception after this date. If no value is given, there will be no start threshold." expr="" /><input type="datetime" name="End Date" friendlyname="End Date" narrative="Optionally, the end threshold date. Any items returned will have been marked as an exception before this date. If no value is given, there will be no end threshold." expr="" /><input type="text" name="Key Filter" friendlyname="Key Filter" narrative="Optionally, a key value to filter by. Only items with this key value will be considered." expr="" /><input type="text" name="Tag Filter" friendlyname="Tag Filter" narrative="Optionally, a tag mask to filter by. This can consist of any number of tag searches - each term can be separated by a semi-colon and they are all applied to the search (ie. they are AND'ed terms not OR'ed terms). For example, &quot;Account: Joint; -Balance: Overdrawn; Card: *Visa*&quot; will include any items which match all the terms, ie. every item must have an 'Account: Joint' tag applied, no item can have a 'Balance: Overdrawn' tag applied, every item must have a tag applied which starts with 'Card: ' and then contains the text 'Visa'." expr="" /><input type="number" name="Maximum Rows" friendlyname="Maximum Rows" narrative="Optionally, the maximum number of rows to return. No value indicates that all rows should be returned" expr="" /><input type="text" name="Resource Name" friendlyname="Resource Name" narrative="Optionally, the name of the resource that worked the exceptioned items" expr="" /></inputs><outputs><output type="collection" name="Exception Items" friendlyname="Exception Items" narrative="The items which were marked with an exception within the given date range, up to the maximum count if one was given" stage="Exception Items" /></outputs><onsuccess>7b59561a-cb46-498c-9934-395040b9e032</onsuccess><resource object="Blueprism.Automate.clsWorkQueuesActions" action="Get Exception Items" /></stage><stage stageid="7f14ec61-48b1-49f6-8556-0b6e9bcdcee1" name="Exception Items" type="Collection"><display x="360" y="-150" /><datatype>collection</datatype><private /><alwaysinit /><collectioninfo><field name="Item ID" type="text" description="The Item ID of the work queue item" displayname="Item ID" /></collectioninfo></stage><stage stageid="7b59561a-cb46-498c-9934-395040b9e032" name="Loop Through Exceptions" type="LoopStart"><loginhibit onsuccess="true" /><display x="300" y="-15" /><onsuccess>f37c9a93-69d6-4b99-abf6-2410982fde82</onsuccess><groupid>259bff9f-1792-45ee-91cb-f90805d64c19</groupid><looptype>ForEach</looptype><loopdata>Exception Items</loopdata></stage><stage stageid="c1efb485-4464-4b71-b4af-1f76182d805c" name="Loop Through Exceptions" type="LoopEnd"><loginhibit onsuccess="true" /><display x="315" y="240" /><onsuccess>d15ca7d4-e2e9-4fdb-9ae3-fa2632010b4a</onsuccess><groupid>259bff9f-1792-45ee-91cb-f90805d64c19</groupid></stage><stage stageid="f37c9a93-69d6-4b99-abf6-2410982fde82" name="GetItem" type="Action"><loginhibit onsuccess="true" /><narrative>Get data relating to an item in a queue. You do not need to have a lock on the item to do this.</narrative><display x="435" y="-15" /><inputs><input type="text" name="Item ID" friendlyname="Item ID" narrative="The ID of the item to get data from. An error will be raised if this item does not exist." expr="[Exception Items.Item ID]" /></inputs><outputs><output type="text" name="Key" friendlyname="Key" narrative="The key value of the item." stage="" /><output type="number" name="Priority" friendlyname="Priority" narrative="The priority of the item" stage="" /><output type="text" name="Status" friendlyname="Status" narrative="The status of the item." stage="" /><output type="number" name="Attempts" friendlyname="Attempts" narrative="The number of attempts already made to work this item." stage="Attempts" /><output type="timespan" name="Worktime" friendlyname="Worktime" narrative="The total time spent on this item (including previous attempts)" stage="" /><output type="timespan" name="Attempt Worktime" friendlyname="Attempt Worktime" narrative="The amount of time spent on this particular attempt of the item" stage="" /><output type="datetime" name="Loaded DateTime" friendlyname="Loaded DateTime" narrative="The date and time at which this item was first loaded into the queue." stage="" /><output type="datetime" name="Deferred DateTime" friendlyname="Deferred DateTime" narrative="The date and time at which this item has been deferred to. Empty if this item has not been deferred." stage="" /><output type="datetime" name="Completed DateTime" friendlyname="Completed DateTime" narrative="The date and time at which this item was marked as complete. Empty if this item has not been marked as complete" stage="" /><output type="datetime" name="Exception DateTime" friendlyname="Exception DateTime" narrative="The date and time at which this item was marked as an exception. Empty if there has never been an exception on this item." stage="" /><output type="text" name="Exception Reason" friendlyname="Exception Reason" narrative="The exception reason recorded against this item." stage="Exception Reason" /><output type="text" name="Tags" friendlyname="Tags" narrative="The semi-colon separated set of tags which apply to the item. " stage="Tags" /><output type="collection" name="Data" friendlyname="Data" narrative="The data associated with the item - a single collection row." stage="Data" /></outputs><onsuccess>2f2e3c48-8808-40a2-b665-a29ee67eb8cd</onsuccess><resource object="Blueprism.Automate.clsWorkQueuesActions" action="Get Item Data" /></stage><stage stageid="a3a5c28d-e00a-4251-9b8e-904377070f6d" name="Exception Reason" type="Data"><display x="510" y="-60" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="06c90a4f-d710-46d2-8bdc-7b7c1adf6577" name="Tags" type="Data"><display x="585" y="-60" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="2c6c5387-2e57-42d8-bbd7-777c19d01e25" name="Data" type="Collection"><display x="450" y="-60" /><datatype>collection</datatype><private /><alwaysinit /></stage><stage stageid="65bdf890-6c24-4d42-a91f-084c37223fff" name="Resubmit ? " type="Decision"><display x="435" y="180" /><decision expression="[Next_Action] = &quot;RESUBMIT&quot;" /><ontrue>da78a4c0-9dc8-4b93-adda-c0b617caaeb9</ontrue><onfalse>c1efb485-4464-4b71-b4af-1f76182d805c</onfalse></stage><stage stageid="6e021da0-e44f-499b-9b44-12b656ac37fa" name="Next_Action" type="Data"><loginhibit onsuccess="true" /><display x="615" y="45" /><datatype>text</datatype><initialvalue xml:space="preserve">RESUBMIT NOT</initialvalue><private /><alwaysinit /></stage><stage stageid="da78a4c0-9dc8-4b93-adda-c0b617caaeb9" name="Add to Queue - Resubmit if bard says so" type="Action"><loginhibit onsuccess="true" /><narrative>The Data collection contains the items to be added to the queue. The collection may contain single or multiple rows, with each representing an item to be added.
+
+If there is a failure during the process, the queue will be unchanged - i.e. no rows will be loaded even if the error occurred on the last one.
+
+If Defer Until is specified, the items will not be available to be worked until then. Otherwise, they are available immediately.
+
+If the queue has a key field defined, an item added has key data longer than the maximum permitted 255 characters, an error will occur</narrative><display x="450" y="240" /><inputs><input type="text" name="Queue Name" friendlyname="Queue Name" narrative="The name of the queue to add items to" expr="[QueueName]" /><input type="collection" name="Data" friendlyname="Data" narrative="A collection containing the data, one row for each item to be added" expr="[Data]" /><input type="datetime" name="Defer Until" friendlyname="Defer Until" narrative="Optionally, the date/time the new item(s) should be deferred until" expr="" /><input type="number" name="Priority" friendlyname="Priority" narrative="Optionally, the priority for the new item(s). Lower numbers represent higher priorities. The default is 0." expr="" /><input type="text" name="Tags" friendlyname="Tags" narrative="Optionally, a semi-colon-separated set of tags to apply to the queue item(s)" expr="[Tags]" /><input type="text" name="Status" friendlyname="Status" narrative="Optionally, the initial status required of the work queue item(s) " expr="" /><input type="number" name="Batch Size" friendlyname="Batch Size" narrative="Optionally, the batch size to use when adding many items to the queue.  A Value of 0 will process all items in one batch.  An empty field will use the default batch size of 1000." expr=""><validator type="BluePrism.AutomateProcessCore.RangeParameterValidation" parameter="0:25000" /></input></inputs><outputs><output type="collection" name="Item IDs" friendlyname="Item IDs" narrative="The IDs of the items which have been added to the queue, in the order of the collection of data passed that was input" stage="Item IDs" /></outputs><onsuccess>c1efb485-4464-4b71-b4af-1f76182d805c</onsuccess><resource object="Blueprism.Automate.clsWorkQueuesActions" action="Add To Queue" /></stage><stage stageid="a6e17975-33ee-4b86-8b21-d69c270e0fad" name="Item IDs" type="Collection"><display x="585" y="240" /><datatype>collection</datatype><private /><alwaysinit /><collectioninfo><field name="Item ID" type="text" description="The Item ID of the work queue item" displayname="Item IDs" /></collectioninfo></stage><stage stageid="de1710fe-1b2d-4826-83ed-d933d65e4285" name="Attempts" type="Data"><display x="660" y="-60" /><datatype>number</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="16047147-cc66-46b5-81c7-1519ea72639a" name="Bard-interaction" type="SubSheetInfo"><subsheetid>3a988150-a880-48ca-8322-96a127f86fd8</subsheetid><display x="-195" y="-105" w="150" h="90" /></stage><stage stageid="a4bd8641-533a-4ba0-affc-b8a79f7aa842" name="Start" type="Start"><subsheetid>3a988150-a880-48ca-8322-96a127f86fd8</subsheetid><display x="15" y="-105" /><inputs><input type="text" name="Input" stage="Input" /></inputs><onsuccess>257656d8-932a-434b-848c-d3bb21f1cedd</onsuccess></stage><stage stageid="05a33343-a4eb-430f-a775-cc1ad400aa20" name="End" type="End"><subsheetid>3a988150-a880-48ca-8322-96a127f86fd8</subsheetid><display x="15" y="90" /><outputs><output type="text" name="output" stage="output" /></outputs></stage><stage stageid="2f2e3c48-8808-40a2-b665-a29ee67eb8cd" name="Bard-interaction" type="SubSheet"><loginhibit onsuccess="true" /><display x="435" y="45" /><inputs><input type="text" name="Input" friendlyname="Input" expr="&quot;Queue Name : &quot; &amp; [QueueName] &amp; &quot; ,Item Id : &quot; &amp; [Exception Items.Item ID] &amp; &quot; , Attempts : &quot; &amp; &quot; , Exception Reason : &quot; &amp; [Exception Reason]" /></inputs><outputs><output type="text" name="output" friendlyname="output" stage="output" /></outputs><onsuccess>1bec488c-3a38-4306-9c8b-c58e5ff38df8</onsuccess><processid>3a988150-a880-48ca-8322-96a127f86fd8</processid></stage><stage stageid="c9eae065-94c2-4b2f-9c76-a96bf7dfcb75" name="Input" type="Data"><subsheetid>3a988150-a880-48ca-8322-96a127f86fd8</subsheetid><display x="90" y="-105" /><datatype>text</datatype><initialvalue xml:space="preserve">HI</initialvalue><private /><alwaysinit /></stage><stage stageid="a7dba7da-17dd-4fdb-bf06-4abf4e6f3d46" name="output" type="Data"><subsheetid>3a988150-a880-48ca-8322-96a127f86fd8</subsheetid><display x="210" y="60" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="257656d8-932a-434b-848c-d3bb21f1cedd" name="LLM Browser Python::Get_LLM_Response" type="Action"><subsheetid>3a988150-a880-48ca-8322-96a127f86fd8</subsheetid><loginhibit onsuccess="true" /><display x="15" y="-15" /><inputs><input type="text" name="input" friendlyname="input" expr="[Input]" /></inputs><outputs><output type="text" name="Response Content" friendlyname="Response Content" stage="output" /><output type="text" name="HTTP Status Code" friendlyname="HTTP Status Code" stage="HTTP Status Code" /><output type="collection" name="Response Headers" friendlyname="Response Headers" stage="Response Headers" /></outputs><onsuccess>a5f2eb7e-1df9-4c8a-a7e7-36dafcd7f5c7</onsuccess><resource object="LLM Browser Python" action="Get_LLM_Response" /></stage><stage stageid="a283f0d5-05ff-47b3-a71d-dbc20a432f86" name="Response Headers" type="Collection"><subsheetid>3a988150-a880-48ca-8322-96a127f86fd8</subsheetid><display x="285" y="-15" /><datatype>collection</datatype><private /><alwaysinit /></stage><stage stageid="a6ac760c-2d80-468a-a092-76cb73105a2d" name="HTTP Status Code" type="Data"><subsheetid>3a988150-a880-48ca-8322-96a127f86fd8</subsheetid><display x="180" y="-15" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="70f0b818-328d-4030-95d6-2bfb2608d7ef" name="output" type="Data"><display x="510" y="45" /><datatype>text</datatype><initialvalue xml:space="preserve">{"output":"{ "Queuename": "ExceptionTestQueue","action": "retry","itemid": "9ad9652e-5541-469b-95b5-da88ee539e3e","defertime": "2023-12-22 02:00:00" }"}
+</initialvalue><private /><alwaysinit /></stage><stage stageid="a5f2eb7e-1df9-4c8a-a7e7-36dafcd7f5c7" name="remove chars" type="MultipleCalculation"><subsheetid>3a988150-a880-48ca-8322-96a127f86fd8</subsheetid><loginhibit onsuccess="true" /><display x="15" y="30" /><onsuccess>05a33343-a4eb-430f-a775-cc1ad400aa20</onsuccess><steps><calculation expression="Replace([output], &quot;\n&quot;, &quot;&quot;)" stage="output" /><calculation expression="Replace([output], &quot;\&quot;, &quot;&quot;)" stage="output" /></steps></stage><stage stageid="1bec488c-3a38-4306-9c8b-c58e5ff38df8" name="Json to collection" type="Action"><loginhibit onsuccess="true" /><display x="435" y="105" /><inputs><input type="text" name="json" friendlyname="json" expr="[output]" /></inputs><outputs><output type="collection" name="Result" friendlyname="Result" stage="LLMResponseCollection" /></outputs><onsuccess>65bdf890-6c24-4d42-a91f-084c37223fff</onsuccess><resource object="Utility - JSON" action="JSON to Collection" /></stage><stage stageid="e38c04df-d664-4cc7-8d19-e98c2378749a" name="LLMResponseCollection" type="Collection"><display x="615" y="120" w="120" h="60" /><datatype>collection</datatype><private /><alwaysinit /></stage></process></process>
+        <object id="041de6eb-48f5-48d1-9ee4-a2c060254bce" name="GetQueueExceptions" xmlns="http://www.blueprism.co.uk/product/process"><process name="GetQueueExceptions" version="1.0" bpversion="7.3.0.5589" narrative="" byrefcollection="true" processrunningmessage="" type="object" runmode="Exclusive"><appdef><element name="Application Root"><id>e827c8f1-bc1d-4b9a-8aab-d7c1dadbbcf3</id><type>Application</type><basetype>Application</basetype><datatype>unknown</datatype><diagnose>False</diagnose></element></appdef><view><camerax>0</camerax><cameray>0</cameray><zoom version="2">1.25</zoom></view><preconditions /><endpoint narrative="" /><subsheet subsheetid="94f11760-a6aa-48f2-913d-6fdf6813f84c" type="CleanUp" published="True"><name>Clean Up</name><view><camerax>0</camerax><cameray>0</cameray><zoom version="2">1.25</zoom></view></subsheet><subsheet subsheetid="f3abd4e4-6cd8-4ec2-a7ba-8d9252174e9e" type="Normal" published="False"><name>GetQueueExceptionList</name><view><camerax>0</camerax><cameray>0</cameray><zoom version="2">1.25</zoom></view></subsheet><stage stageid="5bad65a1-eb7d-4377-b5ae-dd070269e92d" name="Start" type="Start"><loginhibit /><display x="15" y="-105" /><onsuccess>fac6c8f1-7bcd-46c0-9a2f-b0b670f4a435</onsuccess></stage><stage stageid="fac6c8f1-7bcd-46c0-9a2f-b0b670f4a435" name="End" type="End"><loginhibit /><display x="15" y="90" /></stage><stage stageid="14ac23ad-0ee9-4507-bcdc-906bfac32b5d" name="Stage1" type="ProcessInfo"><display x="-195" y="-105" w="150" h="90" /><references><reference>System.dll</reference><reference>System.Data.dll</reference><reference>System.Xml.dll</reference><reference>System.Drawing.dll</reference></references><imports><import>System</import><import>System.Drawing</import><import>System.Data</import></imports><language>visualbasic</language><globalcode><![CDATA[]]></globalcode><code><![CDATA[]]></code></stage><stage stageid="f6ccdb79-b711-4a94-b8ed-6b6ab0c4401d" name="Clean Up" type="SubSheetInfo"><subsheetid>94f11760-a6aa-48f2-913d-6fdf6813f84c</subsheetid><display x="-195" y="-105" w="150" h="90" /></stage><stage stageid="4daa7b97-3a9f-48c0-9d59-805562c6c1a9" name="Start" type="Start"><subsheetid>94f11760-a6aa-48f2-913d-6fdf6813f84c</subsheetid><loginhibit /><display x="15" y="-105" /><onsuccess>c5ffda07-4691-45b4-a5f3-ea11d056c32f</onsuccess></stage><stage stageid="c5ffda07-4691-45b4-a5f3-ea11d056c32f" name="End" type="End"><subsheetid>94f11760-a6aa-48f2-913d-6fdf6813f84c</subsheetid><loginhibit /><display x="15" y="90" /></stage><stage stageid="52c424ca-1fe0-4e6a-b29c-4b83e4d3f775" name="GetQueueExceptionList" type="SubSheetInfo"><subsheetid>f3abd4e4-6cd8-4ec2-a7ba-8d9252174e9e</subsheetid><display x="-195" y="-105" w="150" h="90" /></stage><stage stageid="f0fc1736-1337-4d58-a2a1-1752d8c3a5e7" name="Start" type="Start"><subsheetid>f3abd4e4-6cd8-4ec2-a7ba-8d9252174e9e</subsheetid><loginhibit /><display x="15" y="-105" /><inputs><input type="text" name="QueueName" stage="QueueName" /><input type="number" name="Days" stage="Days" /></inputs><onsuccess>1f839a35-e4fe-4d0e-9381-cda2291ffa2f</onsuccess></stage><stage stageid="22d5d2c5-9310-4d30-b7cf-88d68e552f34" name="End" type="End"><subsheetid>f3abd4e4-6cd8-4ec2-a7ba-8d9252174e9e</subsheetid><loginhibit /><display x="15" y="90" /></stage><stage stageid="6f71ddff-b206-472d-8e8b-44aef3af5e96" name="" type="Note"><subsheetid>94f11760-a6aa-48f2-913d-6fdf6813f84c</subsheetid><narrative>Clean Up Page
+
+This is an optional page where you might choose to perform some finalisation (or "cleanup") tasks as your business object is closed down.
+
+The cleanup action will be called automatically immediately after closing your business object at the end of a business process.
+
+You will not be able to call this action from a business process, nor will it be called at any other time than before the disposal of the business object.</narrative><display x="-180" y="60" w="180" h="230" /></stage><stage stageid="c023e068-039b-46f6-9520-d8b8ad1ccffd" name="" type="Note"><narrative>Initialise Page
+
+This is an optional page where you might choose to perform some initialisation tasks after your business object is loaded.
+
+The initialise action will be called automatically immediately after loading your business object.
+
+You will not be able to call this action from a business process, nor will it be called at any other time than after the creation of the object.</narrative><display x="-180" y="60" w="180" h="230" /></stage><stage stageid="275bce76-7f2e-4cc0-b385-92bb727cf04b" name="QueueName" type="Data"><subsheetid>f3abd4e4-6cd8-4ec2-a7ba-8d9252174e9e</subsheetid><display x="-255" y="-15" /><datatype>text</datatype><initialvalue xml:space="preserve">ExceptionTestQueue</initialvalue><private /><alwaysinit /></stage><stage stageid="9157517a-49ef-4c69-b58b-f8288f432732" name="Days" type="Data"><subsheetid>f3abd4e4-6cd8-4ec2-a7ba-8d9252174e9e</subsheetid><display x="-180" y="-15" /><datatype>number</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="1f839a35-e4fe-4d0e-9381-cda2291ffa2f" name="Work Queues::Get Exception Items" type="Action"><subsheetid>f3abd4e4-6cd8-4ec2-a7ba-8d9252174e9e</subsheetid><loginhibit onsuccess="true" /><narrative>Gets the work items from the specified queue which have been marked with an exception on the latest attempt.</narrative><display x="15" y="-30" /><inputs><input type="text" name="Queue Name" friendlyname="Queue Name" narrative="The name of the queue to retrieve the exception items from" expr="[QueueName]" /><input type="datetime" name="Start Date" friendlyname="Start Date" narrative="Optionally, the start threshold date. Any items returned will have been marked as an exception after this date. If no value is given, there will be no start threshold." expr="" /><input type="datetime" name="End Date" friendlyname="End Date" narrative="Optionally, the end threshold date. Any items returned will have been marked as an exception before this date. If no value is given, there will be no end threshold." expr="" /><input type="text" name="Key Filter" friendlyname="Key Filter" narrative="Optionally, a key value to filter by. Only items with this key value will be considered." expr="" /><input type="text" name="Tag Filter" friendlyname="Tag Filter" narrative="Optionally, a tag mask to filter by. This can consist of any number of tag searches - each term can be separated by a semi-colon and they are all applied to the search (ie. they are AND'ed terms not OR'ed terms). For example, &quot;Account: Joint; -Balance: Overdrawn; Card: *Visa*&quot; will include any items which match all the terms, ie. every item must have an 'Account: Joint' tag applied, no item can have a 'Balance: Overdrawn' tag applied, every item must have a tag applied which starts with 'Card: ' and then contains the text 'Visa'." expr="" /><input type="number" name="Maximum Rows" friendlyname="Maximum Rows" narrative="Optionally, the maximum number of rows to return. No value indicates that all rows should be returned" expr="" /><input type="text" name="Resource Name" friendlyname="Resource Name" narrative="Optionally, the name of the resource that worked the exceptioned items" expr="" /></inputs><outputs><output type="collection" name="Exception Items" friendlyname="Exception Items" narrative="The items which were marked with an exception within the given date range, up to the maximum count if one was given" stage="Exception Items" /></outputs><onsuccess>22d5d2c5-9310-4d30-b7cf-88d68e552f34</onsuccess><resource object="Blueprism.Automate.clsWorkQueuesActions" action="Get Exception Items" /></stage><stage stageid="e4979dc6-ce77-4fd1-844f-e0b7bfc8e643" name="Exception Items" type="Collection"><subsheetid>f3abd4e4-6cd8-4ec2-a7ba-8d9252174e9e</subsheetid><display x="-255" y="30" /><datatype>collection</datatype><private /><alwaysinit /><collectioninfo><field name="Item ID" type="text" description="The Item ID of the work queue item" displayname="Item ID" /></collectioninfo></stage></process></object>
+        <object id="d39ef435-da5c-4e38-a846-b903b2cf3d8e" name="Utility - JSON" xmlns="http://www.blueprism.co.uk/product/process"><process name="Utility - JSON" version="6.9.0.26970" bpversion="7.3.0.5589" narrative="An object for parsing JSON into a collection and turning a collection into JSON." byrefcollection="true" processrunningmessage="" type="object" runmode="Background"><appdef><element name="Application Root"><id>8f20ac0c-296f-43c3-b0d9-59b5b2b7da1c</id><type>Application</type><basetype>Application</basetype><datatype>unknown</datatype><diagnose>False</diagnose></element></appdef><view><camerax>0</camerax><cameray>0</cameray><zoom version="2">1.25</zoom></view><preconditions /><endpoint narrative="" /><subsheet subsheetid="6a9ccb5a-8cc3-44ac-b343-39680558062f" type="CleanUp" published="True"><name>Clean Up</name><view><camerax>0</camerax><cameray>0</cameray><zoom version="2">1.25</zoom></view></subsheet><subsheet subsheetid="560472b9-cea4-41d5-bc36-c49d6c1b26e6" type="Normal" published="True"><name>Collection to JSON</name><view><camerax>0</camerax><cameray>0</cameray><zoom version="2">1.25</zoom></view></subsheet><subsheet subsheetid="e5aeb4cb-cd25-4535-b3be-b46681b4e6b6" type="Normal" published="True"><name>JSON to Collection</name><view><camerax>0</camerax><cameray>0</cameray><zoom version="2">1.25</zoom></view></subsheet><subsheet subsheetid="e53062c7-68de-4763-b37a-456688d0d607" type="Normal" published="True"><name>JSON to Collection (skipping JArray)</name><view><camerax>0</camerax><cameray>0</cameray><zoom version="2">1.25</zoom></view></subsheet><subsheet subsheetid="1c04dc1d-81e9-47e9-a8c4-b46dd19b2624" type="Normal" published="True"><name>JsonPath</name><view><camerax>0</camerax><cameray>-9</cameray><zoom version="2">1.25</zoom></view></subsheet><subsheet subsheetid="cbbe7eb7-53d6-49a6-9f88-cb3a26c334df" type="Normal" published="True"><name>JsonPath - Return Collection</name><view><camerax>0</camerax><cameray>42</cameray><zoom version="2">1.25</zoom></view></subsheet><stage stageid="222ee4c2-914e-4b2b-8e13-443c1c76b3dd" name="Start" type="Start"><loginhibit /><display x="15" y="-105" /><onsuccess>ff6524a3-da73-439c-a4ba-2aabb994009c</onsuccess></stage><stage stageid="ff6524a3-da73-439c-a4ba-2aabb994009c" name="End" type="End"><loginhibit /><display x="15" y="90" /></stage><stage stageid="7fd071f3-6769-4dd5-95cf-a911c73c42ff" name="Stage1" type="ProcessInfo"><display x="-180" y="-105" w="180" h="90" /><references><reference>System.Data.dll</reference><reference>System.Xml.dll</reference><reference>System.Drawing.dll</reference><reference>Newtonsoft.Json.dll</reference><reference>System.Core.dll</reference><reference>System.dll</reference></references><imports><import>System.Data</import><import>System.Drawing</import><import>Newtonsoft.Json</import><import>System.Collections.Generic</import><import>System.Text</import><import>System.IO</import><import>System</import><import>Newtonsoft.Json.Linq</import><import>System.Collections</import><import>System.Linq</import><import>System.Collections</import></imports><language>csharp</language><globalcode><![CDATA[]]></globalcode><code><![CDATA[//**********************************************************************************************
+// NEW CODE
+// This code is used by the 'JSON To Collection (Skipping Array)' action. It is based on 
+// opensource code developed by Tobias Arnold and released under MIT License. The original 
+// source code can be found at the following GitHub link: 
+// 
+// 		https://github.com/toarnold/Coremoran.BluePrism.Json. 
+//
+// To contact Tobias, please refer to his LinkedIn profile: 
+// 
+// 		https://www.linkedin.com/in/tobias-arnold-492368155/  
+//**********************************************************************************************
+static bool IsSingleRowNew(DataTable table)
+{
+	return Convert.ToBoolean(table.ExtendedProperties[SpecialValues.SingleRowPropertyName] ?? false);
+}
+
+static void SetSingleRow(DataTable table, bool singleRow)
+{
+	table.ExtendedProperties[SpecialValues.SingleRowPropertyName] = singleRow;
+}
+
+public static class BluePrismConverter
+{
+	public static DataTable ObjectToCollection(object o)
+	{
+		return JsonToCollection(JsonConvert.SerializeObject(o,
+				new DataTableConverter(),
+				new GroupingConverter(),
+				new DataRowConverter()
+		));
+	}
+
+	public static DataTable JsonToCollection(string json)
+	{
+		return (DataTable)JsonConvert.DeserializeObject(json, typeof(DataTable), new JsonSerializerSettings
+		{
+			Converters = new JsonConverter[]
+			{
+				new DataTableConverter(),
+				new DataRowConverter()
+			},
+			DateTimeZoneHandling = DateTimeZoneHandling.Unspecified
+		});
+	}
+
+	public static string CollectionToJson(DataTable table)
+	{
+		return JsonConvert.SerializeObject(table,
+				new DataTableConverter(),
+				new DataRowConverter());
+	}
+
+	public static JArray CollectionToJArray(DataTable table)
+	{
+		var serializer = JsonSerializer.Create(new JsonSerializerSettings()
+		{
+			Converters = new JsonConverter[] {
+				new DataTableConverter(),
+				new DataRowConverter() }
+		});
+		return JArray.FromObject(table, serializer);
+	}
+}
+
+internal class DataRowConverter : JsonConverter
+{
+	public override bool CanConvert(Type objectType) => objectType == typeof(DataRow);
+
+	public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+	{
+		if (reader.TokenType != JsonToken.StartObject)
+		{
+			throw new Exception("Unsupported JsonToken " + reader.TokenType.ToString());
+		}
+
+		var dt = new DataTable();
+		SetSingleRow(dt, true);
+		dt.Rows.Add();
+		string currentColumnName = null;
+		while (reader.Read() && reader.TokenType != JsonToken.EndObject)
+		{
+			switch (reader.TokenType)
+			{
+				case JsonToken.PropertyName:
+					currentColumnName = reader.Value.ToString();
+					break;
+				default:
+					DataTableRowHandler.HandleJsonData(dt, currentColumnName, serializer, reader);
+					break;
+			}
+		}
+		return dt.Rows[0];
+	}
+
+	public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+	{
+		var dataRow = (DataRow)value;
+		var dataTable = dataRow.Table;
+		if (dataTable.Columns.Count == 1
+			&& dataTable.Columns[0].ColumnName == SpecialValues.JsonUnnamedValue 
+			&& (!IsSingleRowNew(dataTable) || writer.Path == string.Empty))
+		{
+			// First (and single!) element
+			serializer.Serialize(writer, dataRow[0]); 
+		}
+		else
+		{
+			serializer.Serialize(writer, dataTable.Columns.Cast<DataColumn>().ToDictionary(k => k.ColumnName, v => dataRow[v]));
+		}
+	}
+}
+
+internal class DataTableConverter : JsonConverter
+{
+	public override bool CanConvert(Type objectType) => objectType == typeof(DataTable);
+
+	public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+	{
+		var dt = (DataTable)value;
+		if (IsSingleRowNew(dt))
+		{
+			serializer.Serialize(writer, dt.Rows[0]);
+		}
+		else
+		{
+			serializer.Serialize(writer, dt.Select());
+		}
+	}
+
+	public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+	{
+		var dt = new DataTable();
+		switch (reader.TokenType)
+		{
+			case JsonToken.StartObject:
+				dt = serializer.Deserialize<DataRow>(reader).Table;
+				break;
+			case JsonToken.StartArray:
+				SetSingleRow(dt, false);
+				var nullColumns = new HashSet<string>();
+				while (reader.Read() && reader.TokenType != JsonToken.EndArray)
+				{
+					switch (reader.TokenType)
+					{
+						case JsonToken.Null:
+							dt.Rows.Add();
+							break;
+						case JsonToken.StartObject:
+							var tempTable = serializer.Deserialize<DataRow>(reader).Table;
+							var nulls = tempTable.Columns.Cast<DataColumn>().Where(w => tempTable.Rows[0].IsNull(w.ColumnName)).Select(s => s.ColumnName).ToList();
+							nulls.ForEach(n => tempTable.Columns.Remove(n));
+							nullColumns.UnionWith(nulls);
+							dt.Merge(tempTable, true, MissingSchemaAction.Add);
+							break;
+						default:
+							DataTableRowHandler.HandleJsonData(dt, null, serializer, reader);
+							break;
+					}
+				}
+				// Add not set Null-Columns
+				dt.Columns.AddRange(nullColumns.Where(w => !dt.Columns.Contains(w)).Select(s => new DataColumn(s)).ToArray());
+				break;
+			default: /* Try to append a single value */
+				if (reader.TokenType != JsonToken.Null)
+				{
+					SetSingleRow(dt, true);
+					dt.Rows.Add();
+					DataTableRowHandler.HandleJsonData(dt, null, serializer, reader);
+				}
+				break;
+		}
+		return dt;
+	}
+}
+
+internal static class DataTableRowHandler
+{
+	private static void AppendArrayItem(DataTable table, Type colType, string colName, object value)
+	{
+		if (!table.Columns.Contains(colName))
+		{
+			var newcolumn = new DataColumn(colName, colType); 
+			if (colType == typeof(DateTime))
+			{
+				newcolumn.DateTimeMode = DataSetDateTime.Utc;
+			}
+			table.Columns.Add(newcolumn);
+		}
+		if (IsSingleRowNew(table))
+		{
+			table.Rows[0][colName] = value;
+		}
+		else
+		{
+			var newRow = table.NewRow();
+			newRow[colName] = value;
+			table.Rows.Add(newRow);
+		}
+	}
+
+	internal static void HandleJsonData(DataTable table, string currentColumnName, JsonSerializer serializer, JsonReader reader)
+	{
+		switch (reader.TokenType)
+		{
+			case JsonToken.String:
+			case JsonToken.Null:
+				AppendArrayItem(table, typeof(string), currentColumnName ?? SpecialValues.JsonUnnamedValue, reader.Value);
+				break;
+			case JsonToken.Integer:
+			case JsonToken.Float:
+				AppendArrayItem(table, typeof(decimal), currentColumnName ?? SpecialValues.JsonUnnamedValue, reader.Value);
+				break;
+			case JsonToken.Boolean:
+				AppendArrayItem(table, typeof(bool), currentColumnName ?? SpecialValues.JsonUnnamedValue, reader.Value);
+				break;
+			case JsonToken.Date:
+				AppendArrayItem(table, typeof(DateTime), currentColumnName ?? SpecialValues.JsonUnnamedValue, reader.Value);
+				break;
+			case JsonToken.StartObject:
+				AppendArrayItem(table, typeof(DataTable), currentColumnName ?? SpecialValues.JsonUnnamedValue, serializer.Deserialize<DataTable>(reader));
+				break;
+			case JsonToken.StartArray:
+				AppendArrayItem(table, typeof(DataTable), currentColumnName ?? SpecialValues.JsonUnnamedValue, serializer.Deserialize<DataTable>(reader));
+				break;
+			default:
+				throw new Exception("Unsupported JsonToken " + reader.TokenType.ToString());
+		}
+	}
+}
+
+internal class GroupingConverter : JsonConverter
+{
+	public override bool CanRead => false;
+
+	public override bool CanConvert(Type objectType) => objectType.GetInterfaces().Any(a => a.IsGenericType && a.GetGenericTypeDefinition() == typeof(IGrouping<,>));
+
+	public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) => throw new NotImplementedException();
+
+	public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+	{
+		// Get key object with reflection
+		var keyInfo = value.GetType().GetProperty("Key");
+		var key = JToken.FromObject(keyInfo.GetValue(value));
+
+		var data = key is JObject obj ? obj : new JObject { { SpecialValues.GroupingSingleKeyColumnName, key } };
+		data.Add(SpecialValues.GroupingGroupColumnName, JArray.FromObject(((IEnumerable<object>)value).Select(x => x), serializer));
+
+		serializer.Serialize(writer, data);
+	}
+}
+
+public class SpecialValues
+{
+	public const string JsonUnnamedValue = "JSON_Unnamed_Value";
+	public const string SingleRowPropertyName = "SingleRow";
+	public const string GroupingSingleKeyColumnName = "Key";
+	public const string GroupingGroupColumnName = "Group";
+}
+
+//**********************************************************************************************
+// LEGACY CODE
+// This is the original code of the Utility - JSON VBO. This code is used by the 
+// 'JSON To Collection' and 'Collection To JSON' actions.
+//**********************************************************************************************
+private bool mUseNewParseMethod = false;
+
+private class JSON
+{
+	public const string Array = "JSON:Array";
+	public const string Null = "JSON:Null";
+}
+
+public string ConvertToJSON(DataTable dt)
+{
+	object o = SerialiseGeneric(dt, true);
+	return JsonConvert.SerializeObject(o);
+}
+
+public object SerialiseGeneric(object o, bool removeArray)
+{
+	DataTable dt = o as DataTable;
+	if (dt != null)
+		return SerialiseDataTable(dt);
+
+	DataRow dr = o as DataRow;
+	if (dr != null)
+		return SerialiseDataRow(dr, removeArray);
+
+	string s = o as string;
+	if (s != null && s == JSON.Null)
+		return null;
+
+	if (o != null)
+		return o;
+
+	return null;
+}
+
+public object SerialiseDataTable(DataTable dt)
+{
+	if (IsSingleRow(dt))
+		return SerialiseGeneric(dt.Rows[0], false);
+	else
+	{
+		JArray ja = new JArray();
+		foreach (DataRow r in dt.Rows)
+			ja.Add(SerialiseGeneric(r, true));
+		return ja;
+	}
+}
+
+public bool IsSingleRow(DataTable dt)
+{
+	if (dt.ExtendedProperties.Contains("SingleRow"))
+		return System.Convert.ToBoolean(dt.ExtendedProperties["SingleRow"]);
+	// Fallback for older versions of blueprism
+	return dt.Rows.Count == 1;
+}
+
+public object SerialiseDataRow(DataRow dr, bool removeArray)
+{
+	JObject jo = new JObject();
+	foreach (DataColumn c in dr.Table.Columns)
+	{
+		string s = c.ColumnName;
+		if (removeArray && s == JSON.Array)
+			return SerialiseGeneric(dr[s], true);
+		jo[s] = JToken.FromObject(SerialiseGeneric(dr[s], false));
+	}
+	return jo;
+}
+
+public DataTable ConvertToDataTable(string json)
+{
+	object o = JsonConvert.DeserializeObject(json);
+	return (DataTable)DeserialiseGeneric(o, true);
+}
+
+private object DeserialiseGeneric(object o, bool populate)
+{
+	JArray a = o as JArray;
+	if (a != null)
+		return mUseNewParseMethod ? DeserialiseArrayWithoutJArray(a, populate) : DeserialiseArray(a, populate);
+
+	JObject jo = o as JObject;
+	if (jo != null)
+		return DeserialiseObject(jo, populate);
+
+	JValue jv = o as JValue;
+	if (jv != null)
+		return jv.Value;
+
+	return JSON.Null;
+}
+
+private string GetKey(KeyValuePair<string, JToken> kv)
+{
+	if (kv.Key != null)
+		return kv.Key.ToString();
+	return "";
+}
+
+
+private DataTable DeserialiseObject(JObject o, bool populate)
+{
+	DataTable dt = new DataTable();
+
+	foreach (KeyValuePair<string, JToken> kv in o)
+	{
+		Type type = GetTypeOf(DeserialiseGeneric(kv.Value, false));
+		dt.Columns.Add(GetKey(kv), type);
+	}
+
+	if (populate)
+	{
+		DataRow dr = dt.NewRow();
+		foreach (KeyValuePair<string, JToken> kv in o)
+			dr[GetKey(kv)] = DeserialiseGeneric(kv.Value, true);
+		dt.Rows.Add(dr);
+	}
+
+	return dt;
+}
+
+private DataTable DeserialiseArrayWithoutJArray(JArray jarr, bool populate)
+{
+	DataTable dt = new DataTable();
+
+	Type first = null;
+	foreach (object e in jarr)
+	{
+		if (first == null)
+			first = GetTypeOf(DeserialiseGeneric(e, false));
+		if (GetTypeOf(DeserialiseGeneric(e, false)) != first)
+			throw new Exception("Data Type mismatch in array");
+	}
+
+	System.Collections.Specialized.OrderedDictionary columns = new System.Collections.Specialized.OrderedDictionary();
+	var allTypesInColumnsMatch = jarr.All(e =>
+	{
+		if (!(e is JObject))
+			return false;
+		foreach (KeyValuePair<string, JToken> pair in (JObject)e)
+		{
+			object val = pair.Value;
+			if (val is JValue)
+				val = (JValue)(pair.Value);
+			var tp = val ?? (object)"".GetType();
+
+			if (columns.Contains(pair.Key))
+			{
+				if (tp != columns[pair.Key])
+					return false;
+			}
+			else
+				columns[pair.Key] = tp;
+		}
+		return true;
+	});
+
+	if (allTypesInColumnsMatch)
+	{
+		foreach (DictionaryEntry pair in columns)
+		{
+			string key = System.Convert.ToString(pair.Key);
+			Type tp = (Type)pair.Value;
+			if (tp == typeof(JObject) || tp == typeof(JArray))
+				dt.Columns.Add(key, typeof(DataTable));
+			else
+				dt.Columns.Add(key, tp);
+		}
+	}
+	else if (first != null)
+		dt.Columns.Add(JSON.Array, first);
+
+	if (populate)
+	{
+		foreach (object e in jarr)
+		{
+			DataRow dr = dt.NewRow();
+			if (allTypesInColumnsMatch)
+			{
+				foreach (KeyValuePair<string, JToken> pair in (JObject)e)
+					dr[pair.Key] = DeserialiseGeneric(pair.Value, true);
+			}
+			else
+				dr[JSON.Array] = DeserialiseGeneric(e, true);
+
+			dt.Rows.Add(dr);
+		}
+	}
+
+	return dt;
+}
+
+private DataTable DeserialiseArray(JArray o, bool populate)
+{
+	DataTable dt = new DataTable();
+
+	Type first = null;
+	foreach (object e in o)
+	{
+		if (first == null)
+			first = GetTypeOf(DeserialiseGeneric(e, false));
+		if (GetTypeOf(DeserialiseGeneric(e, false)) != first)
+			throw new Exception("Data Type mismatch in array");
+	}
+	if (first != null)
+		dt.Columns.Add(JSON.Array, first);
+
+	if (populate)
+	{
+		foreach (object e in o)
+		{
+			DataRow dr = dt.NewRow();
+			dr[JSON.Array] = DeserialiseGeneric(e, true);
+			dt.Rows.Add(dr);
+		}
+	}
+
+	return dt;
+}
+
+private Type GetTypeOf(object o)
+{
+	if (o == null)
+		return typeof(string);
+	return o.GetType();
+}
+
+public bool IsNumeric(string value)
+{
+    return value.All(char.IsNumber);
+}]]></code></stage><stage stageid="c290e7f4-b01b-4012-9422-044432a3cc82" name="Clean Up" type="SubSheetInfo"><subsheetid>6a9ccb5a-8cc3-44ac-b343-39680558062f</subsheetid><display x="-195" y="-105" w="150" h="90" /></stage><stage stageid="662f70f7-7036-462d-b9bf-f35265dd971a" name="Start" type="Start"><subsheetid>6a9ccb5a-8cc3-44ac-b343-39680558062f</subsheetid><loginhibit /><display x="15" y="-105" /><onsuccess>153f4275-2acd-48a5-b6e6-409fcb2441a8</onsuccess></stage><stage stageid="153f4275-2acd-48a5-b6e6-409fcb2441a8" name="End" type="End"><subsheetid>6a9ccb5a-8cc3-44ac-b343-39680558062f</subsheetid><loginhibit /><display x="15" y="90" /></stage><stage stageid="885aaf30-a216-44c5-975b-ca58ce02f815" name="JSON to Collection" type="SubSheetInfo"><subsheetid>e5aeb4cb-cd25-4535-b3be-b46681b4e6b6</subsheetid><display x="-195" y="-105" w="150" h="90" /></stage><stage stageid="e5625896-d966-4a10-aa39-2e85611f490f" name="Start" type="Start"><subsheetid>e5aeb4cb-cd25-4535-b3be-b46681b4e6b6</subsheetid><loginhibit /><display x="15" y="-105" /><inputs><input type="text" name="json" stage="json" /></inputs><onsuccess>779de445-0658-4a45-a1ef-a38d6de24429</onsuccess></stage><stage stageid="66526e3e-8b9e-4452-9ca8-f70baa9aec4a" name="End" type="End"><subsheetid>e5aeb4cb-cd25-4535-b3be-b46681b4e6b6</subsheetid><loginhibit /><display x="15" y="45" /><outputs><output type="collection" name="Result" stage="Result" /></outputs></stage><stage stageid="007e04e2-4ed0-4afd-87d3-c06d79f48d86" name="new" type="Note"><subsheetid>6a9ccb5a-8cc3-44ac-b343-39680558062f</subsheetid><narrative>Clean Up Page
+
+This is an optional page where you might choose to perform some finalisation (or "cleanup") tasks as your business object is closed down.
+
+The cleanup action will be called automatically immediately after closing your business object at the end of a business process.
+
+You will not be able to call this action from a business process, nor will it be called at any other time than before the disposal of the business object.</narrative><display x="-180" y="60" w="180" h="230" /></stage><stage stageid="d92fd7fc-b028-457a-a14a-17d66c4b5513" name="new" type="Note"><narrative>Initialise Page
+
+This is an optional page where you might choose to perform some initialisation tasks after your business object is loaded.
+
+The initialise action will be called automatically immediately after loading your business object.
+
+You will not be able to call this action from a business process, nor will it be called at any other time than after the creation of the object.</narrative><display x="-180" y="60" w="180" h="230" /></stage><stage stageid="779de445-0658-4a45-a1ef-a38d6de24429" name="JSON To Collection" type="Code"><subsheetid>e5aeb4cb-cd25-4535-b3be-b46681b4e6b6</subsheetid><loginhibit /><display x="15" y="-30" /><inputs><input type="text" name="json" expr="[json]" /></inputs><outputs><output type="collection" name="result" stage="Result" /></outputs><onsuccess>66526e3e-8b9e-4452-9ca8-f70baa9aec4a</onsuccess><code><![CDATA[result = ConvertToDataTable(json);]]></code></stage><stage stageid="da3984e5-ce52-4649-81c5-a71d452a5ba0" name="json" type="Data"><subsheetid>e5aeb4cb-cd25-4535-b3be-b46681b4e6b6</subsheetid><display x="-195" y="0" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="0e93e91c-85e1-4c75-b74c-52d08c0724e6" name="Collection to JSON" type="SubSheetInfo"><subsheetid>560472b9-cea4-41d5-bc36-c49d6c1b26e6</subsheetid><display x="-195" y="-105" w="150" h="90" /></stage><stage stageid="c10fccbd-439b-447d-908a-58f20a540146" name="Start" type="Start"><subsheetid>560472b9-cea4-41d5-bc36-c49d6c1b26e6</subsheetid><loginhibit /><display x="15" y="-105" /><inputs><input type="collection" name="Data" stage="Data" /></inputs><onsuccess>7923115c-5283-4694-b2c1-142afb4d3788</onsuccess></stage><stage stageid="ede1f653-07f1-42eb-8616-8d2d3dfb5244" name="End" type="End"><subsheetid>560472b9-cea4-41d5-bc36-c49d6c1b26e6</subsheetid><loginhibit /><display x="15" y="60" /><outputs><output type="text" name="JSON" stage="JSON" /></outputs></stage><stage stageid="8f488472-d2dd-4bbc-a98e-07d6a494ab3f" name="Result" type="Collection"><subsheetid>e5aeb4cb-cd25-4535-b3be-b46681b4e6b6</subsheetid><display x="-195" y="75" /><datatype>collection</datatype><private /><alwaysinit /></stage><stage stageid="7923115c-5283-4694-b2c1-142afb4d3788" name="Collection To JSON" type="Code"><subsheetid>560472b9-cea4-41d5-bc36-c49d6c1b26e6</subsheetid><loginhibit /><display x="15" y="-30" /><inputs><input type="collection" name="data" expr="[Data]" /></inputs><outputs><output type="text" name="json" stage="JSON" /></outputs><onsuccess>ede1f653-07f1-42eb-8616-8d2d3dfb5244</onsuccess><code><![CDATA[json = ConvertToJSON(data);]]></code></stage><stage stageid="dbeac687-55ba-4b1a-9e9b-1a5f1e763886" name="Data" type="Collection"><subsheetid>560472b9-cea4-41d5-bc36-c49d6c1b26e6</subsheetid><loginhibit /><display x="-195" y="-15" /><datatype>collection</datatype><private /><alwaysinit /></stage><stage stageid="60425486-0e54-4004-afef-6ccb7e96828d" name="JSON" type="Data"><subsheetid>560472b9-cea4-41d5-bc36-c49d6c1b26e6</subsheetid><display x="-195" y="60" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="68820997-9906-40ef-b5f3-325f6f0a25b9" name="JSON to Collection (skipping JArray)" type="SubSheetInfo"><subsheetid>e53062c7-68de-4763-b37a-456688d0d607</subsheetid><display x="-195" y="-105" w="150" h="90" /></stage><stage stageid="14799289-a9b9-4b93-aeb6-f0240547be63" name="Start" type="Start"><subsheetid>e53062c7-68de-4763-b37a-456688d0d607</subsheetid><loginhibit /><display x="-30" y="-120" /><inputs><input type="text" name="json" stage="json" /></inputs><onsuccess>8cb729e4-705c-400b-8d1d-0b54dd51fb94</onsuccess></stage><stage stageid="21187841-67f3-4ed1-a3b0-de763bb1e801" name="End" type="End"><subsheetid>e53062c7-68de-4763-b37a-456688d0d607</subsheetid><loginhibit /><display x="-30" y="30" /><outputs><output type="collection" name="Result" stage="Result" /></outputs></stage><stage stageid="8cb729e4-705c-400b-8d1d-0b54dd51fb94" name="JSON To Collection Without JArray" type="Code"><subsheetid>e53062c7-68de-4763-b37a-456688d0d607</subsheetid><loginhibit /><display x="-30" y="-45" /><inputs><input type="text" name="json" expr="[json]" /></inputs><outputs><output type="collection" name="result" stage="Result" /></outputs><onsuccess>21187841-67f3-4ed1-a3b0-de763bb1e801</onsuccess><code><![CDATA[result = BluePrismConverter.JsonToCollection(json);
+]]></code></stage><stage stageid="b3a37b86-f505-4522-80d4-2c9e45ab723c" name="json" type="Data"><subsheetid>e53062c7-68de-4763-b37a-456688d0d607</subsheetid><display x="-195" y="0" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="98ca8a8f-1ce6-4cb7-85e6-9fff8b1b06f9" name="Result" type="Collection"><subsheetid>e53062c7-68de-4763-b37a-456688d0d607</subsheetid><display x="-195" y="75" /><datatype>collection</datatype><private /><alwaysinit /></stage><stage stageid="f95350a7-9c25-487f-ad74-c7ce70ea37a5" name="Note2" type="Note"><narrative>© 2023 Blue Prism Limited
+Licensed under the Blue Prism Asset License and Support Terms
+https://digitalexchange.blueprism.com/fileMedia/download/a9111324-3192-43ff-9166-566620ca1182</narrative><display x="240" y="-15" w="300" h="90" /><font family="Segoe UI" size="12" style="Regular" color="0000FF" /></stage><stage stageid="dfa7d330-e791-49c6-b4fb-6011b4d8d6cc" name="Note1" type="Note"><loginhibit /><narrative>Version 10.0.1</narrative><display x="15" y="-165" w="150" h="30" /><font family="Segoe UI" size="14" style="Bold" color="FF0000" /></stage><stage stageid="c07d13ef-4200-4377-8cfd-bd38c06ea923" name="JsonPath" type="SubSheetInfo"><subsheetid>1c04dc1d-81e9-47e9-a8c4-b46dd19b2624</subsheetid><display x="-195" y="-105" w="150" h="90" /></stage><stage stageid="ee1a9752-11e4-4a3f-aae8-3e910b966e9c" name="Start" type="Start"><subsheetid>1c04dc1d-81e9-47e9-a8c4-b46dd19b2624</subsheetid><loginhibit /><display x="-30" y="-60" /><inputs><input type="text" name="Json" stage="Json" /><input type="text" name="JsonPath" stage="JsonPath" /></inputs><onsuccess>d0ff9ba9-4bf0-4ba4-a9d6-85a5a0935c7e</onsuccess></stage><stage stageid="4b590fe3-4e65-4b28-baa0-8852d218894a" name="End" type="End"><subsheetid>1c04dc1d-81e9-47e9-a8c4-b46dd19b2624</subsheetid><loginhibit /><display x="-30" y="60" /><outputs><output type="number" name="NumericResult" stage="NumericResult" /><output type="text" name="TextResult" stage="TextResult" /><output type="text" name="ErrorMessage" stage="ErrorMessage" /></outputs></stage><stage stageid="7ae65c44-8e32-406c-ad5b-fa0f802cdabd" name="Json" type="Data"><subsheetid>1c04dc1d-81e9-47e9-a8c4-b46dd19b2624</subsheetid><display x="-195" y="0" w="90" h="30" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="b6118f7f-6c60-4e0b-9683-f749ae300a06" name="JsonPath" type="Data"><subsheetid>1c04dc1d-81e9-47e9-a8c4-b46dd19b2624</subsheetid><display x="-195" y="45" w="90" h="30" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="d0ff9ba9-4bf0-4ba4-a9d6-85a5a0935c7e" name="Process Json - Single Output" type="Code"><subsheetid>1c04dc1d-81e9-47e9-a8c4-b46dd19b2624</subsheetid><loginhibit /><display x="-30" y="0" w="120" h="30" /><inputs><input type="text" name="Json" expr="[Json]" /><input type="text" name="JsonPath" expr="[JsonPath]" /></inputs><outputs><output type="text" name="TextResult" stage="TextResult" /><output type="number" name="NumericResult" stage="NumericResult" /><output type="text" name="ErrorMessage" stage="ErrorMessage" /></outputs><onsuccess>4b590fe3-4e65-4b28-baa0-8852d218894a</onsuccess><code><![CDATA[// Initialize the output vars as only one will be used.
+NumericResult = 0;
+TextResult = String.Empty;
+ErrorMessage = String.Empty;
+
+String tempResult = string.Empty;
+
+JObject jo;
+
+jo = JObject.Parse(Json);
+
+try
+{
+	tempResult = (string)jo.SelectToken(JsonPath,true);
+
+	if (IsNumeric(tempResult))
+	{
+		NumericResult = Decimal.Parse(tempResult);
+	}
+	else
+	{
+		TextResult = tempResult;
+	}
+}
+catch (JsonException)
+{
+	ErrorMessage = "Unable to find value in supplied JSON.";
+}
+
+
+
+
+
+
+]]></code></stage><stage stageid="8a2694eb-d12b-4cad-87cb-d43651aeb0f2" name="NumericResult" type="Data"><subsheetid>1c04dc1d-81e9-47e9-a8c4-b46dd19b2624</subsheetid><display x="-165" y="165" /><datatype>number</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="6bb1f845-c916-472b-852a-ab9c873bf569" name="TextResult" type="Data"><subsheetid>1c04dc1d-81e9-47e9-a8c4-b46dd19b2624</subsheetid><display x="-225" y="165" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="b1351cf4-399a-4e58-b568-321f0d3196e5" name="ErrorMessage" type="Data"><subsheetid>1c04dc1d-81e9-47e9-a8c4-b46dd19b2624</subsheetid><loginhibit /><display x="-195" y="210" w="120" h="30" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="94ab4d76-1378-44d7-bfd9-c4a6eaa1e710" name="JsonPath - Return Collection" type="SubSheetInfo"><subsheetid>cbbe7eb7-53d6-49a6-9f88-cb3a26c334df</subsheetid><display x="-195" y="-105" w="150" h="90" /></stage><stage stageid="f48025fa-9b5d-4675-8147-3478db7860c6" name="Start" type="Start"><subsheetid>cbbe7eb7-53d6-49a6-9f88-cb3a26c334df</subsheetid><loginhibit /><display x="-15" y="-45" /><inputs><input type="text" name="Json" stage="Json" /><input type="text" name="JsonPath" stage="JsonPath" /></inputs><onsuccess>a0419bd6-afbf-4de4-98ec-5471c207786c</onsuccess></stage><stage stageid="09dc30b8-a6f6-4594-9044-3e15b51f75ef" name="End" type="End"><subsheetid>cbbe7eb7-53d6-49a6-9f88-cb3a26c334df</subsheetid><loginhibit /><display x="-15" y="135" /><outputs><output type="collection" name="Result" stage="Result" /><output type="text" name="ErrorMessage" stage="ErrorMessage" /></outputs></stage><stage stageid="be0e5e0e-6e93-4633-8c64-c02b0875b278" name="Json" type="Data"><subsheetid>cbbe7eb7-53d6-49a6-9f88-cb3a26c334df</subsheetid><display x="-195" y="0" w="90" h="30" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="ba7a4062-02e0-4458-8755-f7a521119277" name="JsonPath" type="Data"><subsheetid>cbbe7eb7-53d6-49a6-9f88-cb3a26c334df</subsheetid><display x="-195" y="45" w="90" h="30" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="a0419bd6-afbf-4de4-98ec-5471c207786c" name="JsonPath - Return Object" type="Code"><subsheetid>cbbe7eb7-53d6-49a6-9f88-cb3a26c334df</subsheetid><loginhibit /><narrative>This allows multiple objects to be returned as a Json string.</narrative><display x="-15" y="15" /><inputs><input type="text" name="Json" expr="[Json]" /><input type="text" name="JsonPath" expr="[JsonPath]" /></inputs><outputs><output type="text" name="TextResult" stage="TextResult" /><output type="number" name="NumericResult" stage="NumericResult" /><output type="text" name="ErrorMessage" stage="ErrorMessage" /></outputs><onsuccess>03bbb947-bcd3-4602-802b-f0444d868a92</onsuccess><code><![CDATA[//Initialize the output vars as only one will be used.
+NumericResult = 0;
+TextResult = String.Empty;
+ErrorMessage=String.Empty;
+
+string tempResult = string.Empty;
+JToken token;
+
+JObject jo;
+
+jo = JObject.Parse(Json);
+
+try
+{
+	token = jo.SelectToken(JsonPath, true);
+	tempResult = token.ToString();
+
+	TextResult = tempResult;
+}
+catch (JsonException)
+{
+	ErrorMessage = "Unable to find value in supplied JSON.";
+}
+
+
+
+
+
+]]></code></stage><stage stageid="b58dff70-5256-4b01-8e97-ed2efcbcbfcd" name="NumericResult" type="Data"><subsheetid>cbbe7eb7-53d6-49a6-9f88-cb3a26c334df</subsheetid><display x="-225" y="120" /><datatype>number</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="b226d9b3-eff1-427f-8b2e-eb5da2cefb05" name="TextResult" type="Data"><subsheetid>cbbe7eb7-53d6-49a6-9f88-cb3a26c334df</subsheetid><display x="-165" y="120" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="60b9ffe8-dee6-4b41-b324-21aeca4ac438" name="ErrorMessage" type="Data"><subsheetid>cbbe7eb7-53d6-49a6-9f88-cb3a26c334df</subsheetid><loginhibit /><display x="-195" y="210" w="120" h="30" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="03bbb947-bcd3-4602-802b-f0444d868a92" name="JSON to Collection" type="SubSheet"><subsheetid>cbbe7eb7-53d6-49a6-9f88-cb3a26c334df</subsheetid><loginhibit /><display x="-15" y="75" /><inputs><input type="text" name="json" friendlyname="json" expr="[TextResult]" /></inputs><outputs><output type="collection" name="Result" friendlyname="Result" stage="Result" /></outputs><onsuccess>09dc30b8-a6f6-4594-9044-3e15b51f75ef</onsuccess><processid>e5aeb4cb-cd25-4535-b3be-b46681b4e6b6</processid></stage><stage stageid="66ec6cbe-f703-4076-bcf5-5b0e22e41ba3" name="Result" type="Collection"><subsheetid>cbbe7eb7-53d6-49a6-9f88-cb3a26c334df</subsheetid><display x="-195" y="255" /><datatype>collection</datatype><private /><alwaysinit /></stage><stage stageid="87cac279-7118-48cc-b1d7-3658fc032d77" name="Inputs" type="Block"><subsheetid>560472b9-cea4-41d5-bc36-c49d6c1b26e6</subsheetid><loginhibit /><display x="-270" y="-45" w="150" h="60" /><font family="Segoe UI" size="10" style="Regular" color="FFCC00" /></stage><stage stageid="01799449-c645-49c1-8c4f-8986f1b1d742" name="Outputs" type="Block"><subsheetid>560472b9-cea4-41d5-bc36-c49d6c1b26e6</subsheetid><loginhibit /><display x="-270" y="30" w="150" h="60" /><font family="Segoe UI" size="10" style="Regular" color="00FF00" /></stage><stage stageid="a6c9d22a-d9ca-4915-bc8e-d670af070403" name="Inputs" type="Block"><subsheetid>e5aeb4cb-cd25-4535-b3be-b46681b4e6b6</subsheetid><loginhibit /><display x="-270" y="-30" w="150" h="60" /><font family="Segoe UI" size="10" style="Regular" color="FFCC00" /></stage><stage stageid="382cc03e-2ac0-4ec6-adb9-c3cc75a7ca5e" name="Outputs" type="Block"><subsheetid>e5aeb4cb-cd25-4535-b3be-b46681b4e6b6</subsheetid><loginhibit /><display x="-270" y="45" w="150" h="60" /><font family="Segoe UI" size="10" style="Regular" color="00FF00" /></stage><stage stageid="7f989a6d-ca7f-4b8e-a295-13d0e8290cf2" name="Inputs" type="Block"><subsheetid>e53062c7-68de-4763-b37a-456688d0d607</subsheetid><loginhibit /><display x="-270" y="-30" w="150" h="60" /><font family="Segoe UI" size="10" style="Regular" color="FFCC00" /></stage><stage stageid="f366aecb-e6eb-48a8-abe6-7c5815ca65f3" name="Outputs" type="Block"><subsheetid>e53062c7-68de-4763-b37a-456688d0d607</subsheetid><loginhibit /><display x="-270" y="45" w="150" h="60" /><font family="Segoe UI" size="10" style="Regular" color="00FF00" /></stage><stage stageid="8af65c59-f2d4-4d02-a30a-63b08b35cc7f" name="Inputs" type="Block"><subsheetid>1c04dc1d-81e9-47e9-a8c4-b46dd19b2624</subsheetid><loginhibit /><display x="-270" y="-30" w="150" h="105" /><font family="Segoe UI" size="10" style="Regular" color="FFCC00" /></stage><stage stageid="5d7a75fc-0689-4c1b-b7a8-bcb95fc46ffb" name="Outputs" type="Block"><subsheetid>1c04dc1d-81e9-47e9-a8c4-b46dd19b2624</subsheetid><loginhibit /><display x="-270" y="120" w="150" h="120" /><font family="Segoe UI" size="10" style="Regular" color="00FF00" /></stage><stage stageid="52bedb01-d26a-4421-b30a-af904dfd5f10" name="Inputs" type="Block"><subsheetid>cbbe7eb7-53d6-49a6-9f88-cb3a26c334df</subsheetid><loginhibit /><display x="-270" y="-30" w="150" h="105" /><font family="Segoe UI" size="10" style="Regular" color="FFCC00" /></stage><stage stageid="5e1ed7e6-95cc-4409-9c77-3b4c79d24ac6" name="Outputs" type="Block"><subsheetid>cbbe7eb7-53d6-49a6-9f88-cb3a26c334df</subsheetid><loginhibit /><display x="-270" y="165" w="150" h="120" /><font family="Segoe UI" size="10" style="Regular" color="00FF00" /></stage><stage stageid="921b8f62-3650-4490-a8f4-c38efa72e580" name="Intermediary Values" type="Block"><subsheetid>cbbe7eb7-53d6-49a6-9f88-cb3a26c334df</subsheetid><loginhibit /><display x="-270" y="90" w="150" h="60" /><font family="Segoe UI" size="10" style="Regular" color="00FFFF" /></stage></process></object>
+        <work-queue id="2" name="ExceptionTestQueue" key-field="id" xmlns="http://www.blueprism.co.uk/product/work-queue" />
+        <webapiservice id="f6c0f225-aa9a-4514-a39c-54ac6df41499" name="LLM Browser Python" enabled="true" xmlns="http://www.blueprism.co.uk/product/webapiservice">
+            <configuration baseurl="http://127.0.0.1:5000" xmlns="">
+                <actions>
+                    <action id="1" name="Get_LLM_Response" enabled="true" enableRequestOutputParameter="false" disableSendingOfRequest="false">
+                        <description><![CDATA[Getting bard response thru browser - python selenium flask]]></description>
+                        <request httpmethod="GET" urlpath="/LLM?input=[input]">
+                            <headers></headers>
+                            <bodycontent type="0" />
+                        </request>
+                        <parameters>
+                            <actionparameter name="input" expose="true" datatype="64">
+                                <initialvalue><![CDATA["Testing "]]></initialvalue>
+                                <description><![CDATA[]]></description>
+                            </actionparameter>
+                        </parameters>
+                        <outputparameters>
+                            <parameters></parameters>
+                            <code><![CDATA[]]></code>
+                        </outputparameters>
+                    </action>
+                </actions>
+                <commonparameters></commonparameters>
+                <commonheaders></commonheaders>
+                <commonauthentications>
+                    <authentication type="0" />
+                </commonauthentications>
+                <commoncode>
+                    <codeproperties code="" language="visualbasic">
+                        <namespaces>
+                            <namespace>System</namespace>
+                            <namespace>System.Drawing</namespace>
+                            <namespace>System.Data</namespace>
+                        </namespaces>
+                        <references>
+                            <reference>System.dll</reference>
+                            <reference>System.Data.dll</reference>
+                            <reference>System.Xml.dll</reference>
+                            <reference>System.Drawing.dll</reference>
+                        </references>
+                    </codeproperties>
+                </commoncode>
+                <configurationsettings>
+                    <configurationsettings requesttimeout="60" authserverrequesttimeout="10" />
+                </configurationsettings>
+            </configuration>
+        </webapiservice>
+        <process-group id="ab1a70ea-8799-4c37-b661-fd645f453ae2" name="AIOps" isDefaultGroup="False" xmlns="http://www.blueprism.co.uk/product/process-group">
+            <members>
+                <process id="784a202d-bcd7-4825-a7f3-76799f611611" />
+                <process id="c717a9d1-5820-4276-8318-3f4878401831" />
+            </members>
+        </process-group>
+        <object-group id="d8d0d1a3-7e72-4554-be67-3bf0d113d3d0" name="AiOps" isDefaultGroup="False" xmlns="http://www.blueprism.co.uk/product/object-group">
+            <members>
+                <object id="041de6eb-48f5-48d1-9ee4-a2c060254bce" />
+            </members>
+        </object-group>
+        <object-group id="4656f0d8-6d7a-452b-80b2-55bebe601d6e" name="Default" isDefaultGroup="True" xmlns="http://www.blueprism.co.uk/product/object-group">
+            <members>
+                <object id="d39ef435-da5c-4e38-a846-b903b2cf3d8e" />
+            </members>
+        </object-group>
+    </bpr:contents>
+</bpr:release>
