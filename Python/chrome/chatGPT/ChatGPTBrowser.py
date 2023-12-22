@@ -15,12 +15,14 @@ def inputRequest(request):
     input_locator = (By.ID, "prompt-textarea")
     # Send a message to the chatbot
     input_field = WebDriverWait(driver, 10).until(EC.presence_of_element_located(input_locator))
-    modified_text = request.replace('\n', '')
+    modified_text = request.replace('\n', '  ')
     input_field.send_keys(modified_text)
     print("Sent keys to chatgpt about to submit")
     submit_locator = (By.XPATH, "//*[@id='__next']//*//form//button")
     submit_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located(submit_locator))
     submit_button.click()
+    #wait for chat GPt to print
+    time.sleep(10)
 
 
 def getResponse():
@@ -31,7 +33,6 @@ def getResponse():
 
     got_response = False
     # Get the last element from the list (the most recent response)
-    time.sleep(5)
     while not got_response:
         if response_elements:
             last_response_element = response_elements[-1]

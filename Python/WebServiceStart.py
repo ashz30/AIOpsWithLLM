@@ -32,11 +32,11 @@ def get_LLM_response():
     #BardBrowser.inputRequest(full_command)
     #response  = BardBrowser.getResponse()
     #extract json
-    start_index = response.find("{") + 1
-    end_index = response.rfind("}")
+    start_index = response.find("[") + 1
+    end_index = response.rfind("]")
     extracted_string = response[start_index:end_index]
     print(f"Extracted Json response : {extracted_string}")
-    processed_string = "{ " + extracted_string + " }"
+    processed_string = "[ " + extracted_string + " ]"
 
     # Return the processed string
     return (processed_string)

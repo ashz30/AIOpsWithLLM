@@ -16,7 +16,7 @@ def inputRequest(request):
     input_locator = (By.XPATH, "//*/rich-textarea/div[1]")
     # Send a message to the chatbot
     input_field = WebDriverWait(driver, 10).until(EC.presence_of_element_located(input_locator))
-    modified_text = request.replace('\n', '')
+    modified_text = request.replace('\n', '  ')
     print("About to send keys ")
     input_field.send_keys(modified_text)
     #print(" Here modified text : " , modified_text)
