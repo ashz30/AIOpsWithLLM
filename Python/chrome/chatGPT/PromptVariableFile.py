@@ -11,7 +11,7 @@ action : retry , //action to be taken
 itemid : <ItemId>, // item id in the request
 defertime : none // time till which retry needs to be delayed in DD-MM-YYYY HH24:Mi:SS format or none
 }
-2.If exception is a Remote exception with text indicating that the retry may be successful after a particular time, retry the exception item with a latest defer timestamp 30 mins after the indicated time in the as per error description. 
+2.If exception is a Remote exception with text indicating that the retry may be successful after a particular time, retry the exception item with an  defer timestamp 30 mins after the indicated time in the error description. 
 Respond with JSON:
 {
  Queuename :  <queuename>, // queuename in the request
