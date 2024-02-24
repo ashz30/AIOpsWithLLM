@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from chrome import GetExistingChromeSession
 
-driver = GetExistingChromeSession.GetDriver("https://chat.openai.com/c/1e127b7f-63c7-46ff-95f4-b95b50ddf003")
+driver = GetExistingChromeSession.GetDriver("https://chat.openai.com/c/abf18d4d-7cb7-462d-b8a2-64392f3e2027")
 time.sleep(5)
 
 
@@ -22,7 +22,7 @@ def inputRequest(request):
     submit_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located(submit_locator))
     submit_button.click()
     #wait for chat GPt to print
-    time.sleep(20)
+    time.sleep(50)
 
 
 def getResponse():
@@ -44,7 +44,7 @@ def getResponse():
 
         else:
             print("No chatbot responses found")
-            time.sleep(10)
+            #time.sleep(10)
 
 
 def closeBrowser():

@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from chrome import GetExistingChromeSession
 
-driver = GetExistingChromeSession.GetDriver("https://chat.openai.com/c/fb24b8d9-e97a-4a11-9364-056090120586")
+driver = GetExistingChromeSession.GetDriver("https://chat.openai.com/c/38e3f37d-09ba-4db6-8117-131672444b6b")
 time.sleep(5)
 
 

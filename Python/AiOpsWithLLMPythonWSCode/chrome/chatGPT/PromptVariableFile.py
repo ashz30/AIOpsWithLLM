@@ -40,8 +40,7 @@ subjectline: < subjectline >, // Subject line of the email
 body :  < body > // body of the email
 }
 5.Any other exception types than these 4 above, please email as in point 3, change the subject line to “, subject line Remote Exception – <add Queue name - item ID here>”.
-If you receive multiple exceptions in 1 request, combine all JSONS into a list in your response.
-
+If you receive multiple exceptions in 1 request, combine all JSONS into a list in your response. Only 1 JSON snippet should be associated with 1 queue record.
 Exception details: 
 @@EXCEPTION_DETAIL@@
 """
